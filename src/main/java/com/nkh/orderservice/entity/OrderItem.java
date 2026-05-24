@@ -15,18 +15,21 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "orders")
-public class Order extends BaseEntity implements Serializable {
+@Table(name = "order_items")
+public class OrderItem extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid")
     @UuidGenerator
     private String id;
 
-    @Column(name = "user_id")
-    private String userId;
+    @Column(name = "order_id")
+    private String orderId;
 
-    private String status;
+    @Column(name = "product_id")
+    private String productId;
 
-    @Column(name = "total_amount")
-    private BigDecimal totalAmount;
+    private BigDecimal price;
+
+    private Integer quantity;
+
 }

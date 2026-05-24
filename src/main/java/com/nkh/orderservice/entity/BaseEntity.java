@@ -21,11 +21,11 @@ import java.time.Instant;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity implements Serializable {
     @CreatedDate
-    @Column(name = "create_at", updatable = false)
+    @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
     @CreatedBy
-    @Column(name = "create_by", updatable = false)
+    @Column(name = "created_by", updatable = false)
     private String createdBy;
 
     @LastModifiedDate
