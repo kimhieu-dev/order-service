@@ -16,6 +16,7 @@ import com.nkh.orderservice.repository.OrderItemRepo;
 import com.nkh.orderservice.repository.OrderRepo;
 import com.nkh.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductClient productClient;
     private final OrderItemRepo orderItemRepo;
     private final OrderItemMapper orderItemMapper;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -81,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepo.save(savedOrder);
 
         List<OrderItemRes> orderItemResList = orderItemMapper.toListOrderItemRes(orderItems);
-
+        kafkaTemplate.send("order.created",savedOrder);
         return OrderRes.builder()
                 .status(savedOrder.getStatus())
                 .totalAmount(savedOrder.getTotalAmount())

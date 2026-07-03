@@ -7,6 +7,7 @@ import com.nkh.orderservice.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final OrderService orderService;
 
+//    StringSerializer
+//    JsonSerializer
     @PostMapping
     public BaseResponse<OrderRes> create(@RequestBody @Valid CreateOrderReq request) {
         OrderRes response = orderService.create(request);
