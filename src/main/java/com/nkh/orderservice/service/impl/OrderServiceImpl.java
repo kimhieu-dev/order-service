@@ -9,13 +9,16 @@ import com.nkh.orderservice.dto.response.OrderItemRes;
 import com.nkh.orderservice.dto.response.OrderRes;
 import com.nkh.orderservice.entity.Order;
 import com.nkh.orderservice.entity.OrderItem;
+import com.nkh.orderservice.events.OrderCreatedEvent;
 import com.nkh.orderservice.exception.AppException;
 import com.nkh.orderservice.exception.ErrorCode;
 import com.nkh.orderservice.mapper.OrderItemMapper;
+import com.nkh.orderservice.mapper.OrderMapper;
 import com.nkh.orderservice.repository.OrderItemRepo;
 import com.nkh.orderservice.repository.OrderRepo;
 import com.nkh.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -35,10 +38,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepo orderItemRepo;
     private final OrderItemMapper orderItemMapper;
     private final KafkaTemplate<String,Object> kafkaTemplate;
+    private final OrderMapper orderMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderRes create(CreateOrderReq request) {
+    public Order create(CreateOrderReq request) {
         List<String> productIds = request.getOrderItems().stream()
                 .map(CreateOrderItemReq::getProductId).distinct().toList();
 
@@ -80,14 +84,12 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepo.saveAll(orderItems);
         savedOrder.setTotalAmount(totalAmount);
 
-        orderRepo.save(savedOrder);
+//        List<OrderItemRes> orderItemResList = orderItemMapper.toListOrderItemRes(orderItems);
+        OrderCreatedEvent orderCreatedEvent = orderMapper.toEvent(savedOrder);
+        orderCreatedEvent.setOrderItems(orderItems);
 
-        List<OrderItemRes> orderItemResList = orderItemMapper.toListOrderItemRes(orderItems);
-        kafkaTemplate.send("order.created",savedOrder);
-        return OrderRes.builder()
-                .status(savedOrder.getStatus())
-                .totalAmount(savedOrder.getTotalAmount())
-                .orderItems(orderItemResList)
-                .build();
+        kafkaTemplate.send("order_created",orderCreatedEvent);
+        log.info("publish new order success order created");
+        return savedOrder;
     }
 }
