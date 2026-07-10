@@ -75,6 +75,7 @@
             <artifactId>spring-kafka</artifactId>
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
 
     <build>
