@@ -19,6 +19,14 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        delivery.timeout.ms: 30000
+        #thoi gian doi phan hoi tu Broker cho 1 request don le
+        #default 30k
+        request.timeout.ms: 15000
+        #thoi gian toi da de gom lai roi gom lai (batch) truoc khi send
+        #neu muon gui di ngay lap tuc thi set = 0
+      acks: all #0 #1
   jpa:
     database: mysql
     show-sql: true
